@@ -9,10 +9,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::get('/exemplo', function (Request $request) {
-    return json_encode([
-        'exemplo' => 'Exemplo de rota',
-    ]);
+Route::group(['prefix' => 'asass'], function () {
+    Route::post('client', Asaas\Customer\CreateController::class);
+    Route::put('client/{id}', Asaas\Customer\UpdateController::class);
 });
-
-Route::post('asass/client', Asaas\CreateCustomersController::class);

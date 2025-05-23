@@ -26,9 +26,12 @@ trait GuzzleResponseTrait
 
     /**
      * @template T of Data
+     * @param ResponseInterface $response
      * @param class-string<T> $dtoClass
-     * @return Data
-     * @throws JsonException|InvalidArgumentException
+     * @param mixed|null $key
+     * @param array $default
+     * @return array
+     * @throws JsonException
      */
     public static function toDataCollection(
         ResponseInterface $response,

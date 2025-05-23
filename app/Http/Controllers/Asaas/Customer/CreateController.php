@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Asaas;
+namespace App\Http\Controllers\Asaas\Customer;
 
 
 use App\Http\Controllers\Response;
@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use JsonException;
 
-final class CreateCustomersController extends Controller
+final class CreateController extends Controller
 {
     public function __construct(
         private readonly Response $response,
