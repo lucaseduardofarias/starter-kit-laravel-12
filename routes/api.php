@@ -12,4 +12,6 @@ Route::get('/user', function (Request $request) {
 Route::group(['prefix' => 'asass'], function () {
     Route::post('client', Asaas\Customer\CreateController::class);
     Route::put('client/{id}', Asaas\Customer\UpdateController::class);
+    Route::get('client/{id}/payments', Asaas\Payment\IndexController::class);
+    Route::get('client/{id}/cards', Asaas\Card\IndexController::class);
 });
