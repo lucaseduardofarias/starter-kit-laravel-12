@@ -21,6 +21,7 @@ trait GuzzleResponseTrait
         if (! is_array($data)) {
             throw new JsonException('Invalid JSON content in response');
         }
+
         return data_get($data, $key, $default);
     }
 

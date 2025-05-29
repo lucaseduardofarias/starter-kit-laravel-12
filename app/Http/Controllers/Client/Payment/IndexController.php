@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Asaas\Payment;
-
+namespace App\Http\Controllers\Client\Payment;
 
 use App\Http\Controllers\Response;
 use App\Models\Client;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
@@ -15,6 +15,9 @@ final class IndexController extends Controller
     ) {
     }
 
+    /**
+     * @throws ModelNotFoundException
+     */
     public function __invoke(string $id): JsonResponse
     {
         $payments = Client::query()->with('payments', function ($query) {

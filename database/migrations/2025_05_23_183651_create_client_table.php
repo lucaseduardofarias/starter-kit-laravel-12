@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->string('asaas_id')->nullable();
-            $table->string('cpf_cnpj',14)->unique();
+            $table->string('cpf_cnpj', 14)->unique();
             $table->string('name', 50)->nullable();
             $table->string('email', 50)->nullable();
             $table->string('phone', 11)->nullable();

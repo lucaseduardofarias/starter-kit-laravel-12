@@ -1,7 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Asaas\Card;
-
+namespace App\Http\Controllers\Client\Card;
 
 use App\Http\Controllers\Response;
 use App\Models\Client;

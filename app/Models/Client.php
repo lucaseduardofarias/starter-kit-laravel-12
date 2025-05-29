@@ -5,6 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $asaas_id
+ * @property string $cpf_cnpj
+ * @property string $name
+ * @property string $email
+ * @property string $phone
+ * @property string $postal_code
+ * @property string $address
+ * @property string $address_number
+ * @property string $complement
+ * @property string $province
+ */
 class Client extends Model
 {
     protected $fillable = [

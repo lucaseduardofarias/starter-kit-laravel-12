@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Services\Payment\Enum\PaymentTypeEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -32,7 +33,7 @@ class Payment extends Model
             'client_id' => 'int',
             'asaas_id' => 'string',
             'customer' => 'string',
-            'billing_type' => 'string',
+            'billing_type' => PaymentTypeEnum::class,
             'due_date' => 'date:Y-m-d',
             'value' => 'float',
             'installment' => 'int',

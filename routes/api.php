@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Asaas;
+use App\Http\Controllers\Client;
+use App\Http\Controllers\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,8 +11,10 @@ Route::get('/user', function (Request $request) {
 
 
 Route::group(['prefix' => 'asass'], function () {
-    Route::post('client', Asaas\Customer\CreateController::class);
-    Route::put('client/{id}', Asaas\Customer\UpdateController::class);
-    Route::get('client/{id}/payments', Asaas\Payment\IndexController::class);
-    Route::get('client/{id}/cards', Asaas\Card\IndexController::class);
+    Route::get('client', Client\IndexController::class);
+    Route::post('client', Client\CreateController::class);
+    Route::put('client/{id}', Client\UpdateController::class);
+    Route::get('client/{id}/payments', Client\Payment\IndexController::class);
+    Route::post('client/{id}/payments', Payment\CreateController::class);
+    Route::get('client/{id}/cards', Client\Card\IndexController::class);
 });

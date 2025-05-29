@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services\Asaas\Data;
+namespace App\Http\Services\Asaas\Data\Customer;
 
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
@@ -20,7 +20,6 @@ class CustomerOutputData extends Data
         public readonly string|Optional $id,
         public readonly string|Optional $email,
         public readonly string|Optional $phone,
-        public readonly string|Optional $mobilePhone,
         public readonly string|Optional $postalCode,
         public readonly string|Optional $address,
         public readonly string|Optional $addressNumber,
