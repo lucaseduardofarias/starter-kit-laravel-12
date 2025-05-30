@@ -11,10 +11,10 @@ final class CreditCardData extends Data
 {
     public function __construct(
         public string $holderName,
-        public string $number,
-        public string $expiryMonth,
-        public string $expiryYear,
-        public string $ccv,
+        public string|int $number,
+        public int $expiryMonth,
+        public int $expiryYear,
+        public int $ccv,
     ) {
     }
 
@@ -34,21 +34,21 @@ final class CreditCardData extends Data
             ],
             'expiry_month' => [
                 'required',
-                'string',
-                'min:1',
-                'max:2',
+                'integer',
+                'min_digits:2',
+                'max_digits:2',
             ],
             'expiry_year' => [
                 'required',
-                'string',
-                'min:4',
-                'max:4',
+                'integer',
+                'min_digits:4',
+                'max_digits:4',
             ],
             'ccv' => [
                 'required',
-                'string',
-                'min:3',
-                'max:3',
+                'integer',
+                'min_digits:3',
+                'max_digits:3',
             ],
         ];
     }

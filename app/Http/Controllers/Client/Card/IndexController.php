@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client\Card;
 
 use App\Http\Controllers\Response;
-use App\Models\Client;
+use App\Models\Card;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
@@ -16,9 +16,10 @@ final class IndexController extends Controller
 
     public function __invoke(string $id): JsonResponse
     {
-        $cards = Client::query()->with('cards', function ($query) {
-            $query->orderBy('created_at', 'desc');
-        })->findOrFail($id);
+        $cards = Card::query()
+            ->where('client_id', '=', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return $this->response->jsonData($cards);
     }

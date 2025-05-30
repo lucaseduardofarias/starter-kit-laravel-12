@@ -11,26 +11,22 @@ use Spatie\LaravelData\Optional;
 class ClientData extends Data
 {
     public function __construct(
-        public readonly string $name,
         public readonly string $cpf_cnpj,
-        public readonly int|null|Optional $id,
-        public readonly string|null|Optional $asaas_id,
-        public readonly string|null|Optional $email,
-        public readonly string|null|Optional $phone,
-        public readonly string|null|Optional $postal_code,
-        public readonly string|null|Optional $address,
-        public readonly string|null|Optional $address_number,
-        public readonly string|null|Optional $complement,
-        public readonly string|null|Optional $province,
+        public readonly ?string $name,
+        public readonly int|null $id,
+        public readonly string|null $asaas_id,
+        public readonly string|null $email,
+        public readonly string|null $phone,
+        public readonly string|null $postal_code,
+        public readonly string|null $address,
+        public readonly string|null $address_number,
+        public readonly string|null $complement,
+        public readonly string|null $province,
     ) {}
 
     public static function rules(): array
     {
         return [
-            'name' => [
-                'required',
-                'string',
-            ],
             'cpf_cnpj' => [
                 'required',
                 'string',

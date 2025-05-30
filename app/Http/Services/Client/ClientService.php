@@ -12,14 +12,6 @@ final class ClientService
     {
         return Client::query()->create([
             'cpf_cnpj' => $data->cpf_cnpj,
-            'name' => $data->name,
-            'email' => $data->email,
-            'phone' => $data->phone,
-            'postal_code' => $data->postal_code,
-            'address' => $data->address,
-            'address_number' => $data->address_number,
-            'complement' => $data->complement,
-            'province' => $data->province,
         ]);
     }
 

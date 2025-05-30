@@ -1,86 +1,11 @@
-<script>
-import axios from 'axios'
-
-export default {
-    data() {
-        return {
-            disabled: false,
-            editing: false,
-            form: {
-                id: null,
-                cpf_cnpj: '04152084081',
-                name: 'Lucas',
-                email: 'demo@exemplo.com',
-                phone: '51981201903',
-                postal_code: '93048390',
-                address: 'Exemplo de Rua',
-                address_number: '55',
-                complement: '',
-                province: 'Feitoria'
-            },
-        }
-    },
-    methods: {
-        async submit() {
-            if (!this.form.id) {
-                await axios.post('api/asass/client', this.form).then(response => {
-                    this.form = response.data.data
-                    this.disabled = true
-                }).catch(error => {
-                    console.error('Error creating client:', error)
-                })
-
-            }
-
-            await axios.put(`api/asass/client/${this.form.id}`, this.form).then(response => {
-                this.form = response.data.data
-                this.disabled = true
-            }).catch(error => {
-                console.error('Error creating client:', error)
-            })
-        }
-    },
-    mounted() {
-        axios.get('api/asass/client')
-            .then(response => {
-                const data = response.data.data
-                if (!data) {
-                    this.disabled = false
-                    return
-                }
-
-                this.form = data
-                this.disabled = true
-            })
-            .catch(error => {
-                console.error('Error fetching client data:', error)
-            })
-    }
-}
-
-</script>
-
 <template>
-    <h3 class="text-lg font-medium mb-4">
-
-        <button
-            v-if="form.id"
-            @click.prevent="disabled = !disabled"
-            class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 flex justify-end ml-auto"
-        >
-            Editar
-        </button>
-        {{ form.id ? 'Editar Cliente' : 'Novo Cliente' }}
-    </h3>
-
     <form class="space-y-3">
-
         <div class="mb-4" v-if="!disabled">
             <label class="block text-sm">CPF / CNPJ</label>
             <input
                 v-model="form.cpf_cnpj"
                 type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -193,15 +118,71 @@ export default {
         </div>
 
 
-        <div class="mt-4" v-if="!disabled">
+        <div class="mt-4">
             <button
+                v-if="disabled"
+                @click="disabled = !disabled"
+                class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+            >
+                {{ 'Editar'  }}
+            </button>
+
+            <button
+                v-else
                 @click.prevent="submit"
                 :disabled="form.processing"
                 class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
             >
-                {{ form.id ? 'Atualizar' : 'Cadastrar' }}
+                {{ 'Atualizar'  }}
             </button>
         </div>
     </form>
 </template>
 
+
+<script>
+import axios from 'axios'
+import bus from '@/eventBus';
+
+export default {
+    data: function () {
+        return {
+            disabled: true,
+            form: {
+                id: null,
+                asaas_id: '',
+                cpf_cnpj: '',
+                name: '',
+                email: '',
+                phone: '',
+                postal_code: '',
+                address: '',
+                address_number: '',
+                complement: '',
+                province: ''
+            },
+        }
+    },
+    methods: {
+        async submit() {
+            await axios.put(`api/asass/client/${this.form.id}`, this.form).then(({ data: { data } }) => {
+                this.form = data
+                this.disabled = true
+                bus.emit('set-client', this.form);
+            }).catch(error => {
+                console.error('Error creating client:', error)
+            })
+        },
+        setClient(client){
+            this.canClient = !!client;
+            this.form = client;
+        },
+    },
+    created() {
+        bus.on('set-client', (client) => {
+            this.setClient(client);
+        });
+    },
+}
+
+</script>

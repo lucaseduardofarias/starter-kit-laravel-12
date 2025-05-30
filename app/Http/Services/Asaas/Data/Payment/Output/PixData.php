@@ -11,11 +11,12 @@ use Spatie\LaravelData\Optional;
 
 #[MapInputName(CamelCaseMapper::class)]
 #[MapOutputName(SnakeCaseMapper::class)]
-final class FineData extends Data
+final class PixData extends Data
 {
     public function __construct(
-        public float|Optional $value,
-        public string|Optional $type,
+        public string|null|Optional $encodedImage,
+        public string|null|Optional $payload,
+        public string|null|Optional $expirationDate,
     ) {
     }
 }

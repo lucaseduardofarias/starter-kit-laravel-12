@@ -5,7 +5,7 @@
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Pagamentos ASAAS
+                <HeaderVue title="Pagamentos"/>
             </h2>
         </template>
 
@@ -18,7 +18,7 @@
 
                 <!-- Coluna 2/3: tabela, que vai buscar JSON -->
                 <div class="flex-1 bg-white shadow p-4 rounded">
-                    tabela de pagamentos
+                    <Payment/>
                 </div>
             </div>
         </div>
@@ -31,11 +31,12 @@
 import { Head } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import ClientForm from '@/Components/ClientForm.vue'
-import PaymentTable from '@/Components/PaymentTable.vue'
+import Payment from '@/Components/Payment.vue'
+import HeaderVue from '@/Components/Header.vue'
 
 
 export default {
-    components: { Head, AuthenticatedLayout, ClientForm, PaymentTable },
+    components: {HeaderVue, Head, AuthenticatedLayout, ClientForm, Payment },
 
     props: {
         client: { type: Object, default: null }

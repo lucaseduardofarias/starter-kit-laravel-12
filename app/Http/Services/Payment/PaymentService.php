@@ -5,14 +5,15 @@ namespace App\Http\Services\Payment;
 use App\Http\Services\Asaas\AsaasService;
 use App\Http\Services\Asaas\Data\Customer\CustomerInputData;
 use App\Http\Services\Asaas\Data\Payment\Input\PaymentInputData;
+use App\Http\Services\Payment\Enum\PaymentTypeEnum;
 use App\Models\Client;
 use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
 
-final class PaymentService
+final readonly class PaymentService
 {
     public function __construct(
-        private readonly AsaasService $service,
+        private AsaasService $service,
     ) {
     }
 
@@ -37,8 +38,8 @@ final class PaymentService
             'billing_type' => $data->billingType,
             'due_date' => $data->dueDate,
             'value' => $data->value,
-            'installment' => $data->installment,
-            'description' => $data->description,
+            'installment' => $data->installment ?? null,
+            'description' => $data->description ?? null,
         ]);
 
         $service = $data->billingType->service();
@@ -56,6 +57,25 @@ final class PaymentService
         DB::commit();
 
         return $payment;
+    }
+
+    public function paymentByBillingType(string $clientId, string $paymentId): array
+    {
+        $payment = Payment::query()
+            ->where('client_id', '=', $clientId)
+            ->whereKey($paymentId)
+            ->firstOrFail();
+
+        switch ($payment->billing_type){
+            case PaymentTypeEnum::PIX:
+                $data = $this->service->pixQrCode($payment->asaas_id)->toArray();
+                break;
+            case PaymentTypeEnum::BOLETO:
+                $data = ['bank_slip_url' => $payment->bank_slip_url];
+                break;
+        }
+
+        return $data;
     }
 
     public function setCustomer(Client $client): void

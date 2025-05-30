@@ -6,6 +6,7 @@ use App\Http\Services\Asaas\Data\Customer\CustomerInputData;
 use App\Http\Services\Asaas\Data\Customer\CustomerOutputData;
 use App\Http\Services\Asaas\Data\Payment\Input\PaymentInputData;
 use App\Http\Services\Asaas\Data\Payment\Output\PaymentOutputData;
+use App\Http\Services\Asaas\Data\Payment\Output\PixData;
 use App\Http\Services\Asaas\Exception\AsaasClientException;
 use App\Http\Traits\GuzzleResponseTrait;
 use Exception;
@@ -25,6 +26,9 @@ final class AsaasClient
     public const ENDPOINT_CUSTOMERS = 'customers';
     public const ENDPOINT_CUSTOMERS_WITH_ID = 'customers/%s';
     public const ENDPOINT_PAYMENTS = 'payments';
+    public const ENDPOINT_PAYMENTS_WITH_ID = 'payments/%s';
+
+    public const ENDPOINT_PIX_QRCODE = 'payments/%s/pixQrCode';
 
     private Client $clientGuzzle;
     public function __construct()
@@ -136,6 +140,28 @@ final class AsaasClient
 
         return $this->toDataObject($response, PaymentOutputData::class);
     }
+
+    /**
+     * @throws AsaasClientException
+     * @throws JsonException
+     */
+    public function pixQrCode(string $asass_id): PixData
+    {
+        try {
+            $response = $this->clientGuzzle->get(sprintf(self::ENDPOINT_PIX_QRCODE, $asass_id));
+        } catch (GuzzleException $exception) {
+            $this->handleRequestException($exception);
+        } catch (Exception $exception) {
+            throw new AsaasClientException(
+                message: 'Problema não identificado no cadastro do pagamento.',
+                code: FoundationResponse::HTTP_BAD_REQUEST,
+                previous: $exception
+            );
+        }
+
+        return $this->toDataObject($response, PixData::class);
+    }
+
     /**
      * @throws AsaasClientException
      */

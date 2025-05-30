@@ -6,6 +6,7 @@ use App\Http\Services\Asaas\Data\Customer\CustomerInputData;
 use App\Http\Services\Asaas\Data\Customer\CustomerOutputData;
 use App\Http\Services\Asaas\Data\Payment\Input\PaymentInputData;
 use App\Http\Services\Asaas\Data\Payment\Output\PaymentOutputData;
+use App\Http\Services\Asaas\Data\Payment\Output\PixData;
 use App\Http\Services\Asaas\Exception\AsaasClientException;
 use JsonException;
 
@@ -33,6 +34,16 @@ final class AsaasService
     {
         try {
             return $this->asaasClient->createPayment($data);
+        } catch (AsaasClientException|JsonException $exception) {
+            throw new \RuntimeException($exception->getMessage(), $exception->getCode());
+        }
+    }
+
+
+    public function pixQrCode(string $asass_id): PixData
+    {
+        try {
+            return $this->asaasClient->pixQrCode($asass_id);
         } catch (AsaasClientException|JsonException $exception) {
             throw new \RuntimeException($exception->getMessage(), $exception->getCode());
         }

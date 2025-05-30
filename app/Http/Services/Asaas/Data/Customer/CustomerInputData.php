@@ -13,7 +13,7 @@ class CustomerInputData extends Data
     public function __construct(
         public readonly string $name,
         public readonly string $cpf_cnpj,
-        public readonly string $external_reference,
+        public readonly string|int|null $external_reference,
         public readonly string|Optional $id,
         public readonly string|Optional $email,
         public readonly string|Optional $phone,
