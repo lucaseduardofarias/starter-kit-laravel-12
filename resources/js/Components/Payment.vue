@@ -530,6 +530,7 @@ export default {
                 this.showModalPayment = false;
                 await this.showPayment(data.data.id, data.data.billing_type);
                 await this.fetchPayments();
+                this.loading = false;
             } catch (error) {
                 this.loading = false;
                 const resp = error.response;
