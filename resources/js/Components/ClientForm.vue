@@ -4,8 +4,18 @@
             <label class="block text-sm">CPF / CNPJ</label>
             <input
                 v-model="form.cpf_cnpj"
+                v-imask="{
+                  mask: [
+                    { mask: '000.000.000-00' },
+                    { mask: '00.000.000/0000-00' }
+                  ],
+                  dispatch: function (appended, dynamicMasked) {
+                    const onlyNumbers = (dynamicMasked.value + appended).replace(/\D+/g, '');
+                    return onlyNumbers.length > 11 ? dynamicMasked.compiledMasks[1]: dynamicMasked.compiledMasks[0];
+                  }
+                }"
                 type="text"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -18,7 +28,7 @@
             <input
                 v-model="form.name"
                 type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -30,8 +40,8 @@
             <label class="block text-sm">Email </label>
             <input
                 v-model="form.email"
-                type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                type="email"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -43,8 +53,18 @@
             <label class="block text-sm">Celular </label>
             <input
                 v-model="form.phone"
+                v-imask="{
+                  mask: [
+                    { mask: '(00) 00000-0000' },
+                    { mask: '(00) 0000-0000' }
+                  ],
+                  dispatch: function (appended, dynamicMasked) {
+                    const nums = (dynamicMasked.value + appended).replace(/\D+/g, '');
+                    return nums.length > 10 ? dynamicMasked.compiledMasks[0]: dynamicMasked.compiledMasks[1];
+                  }
+                }"
                 type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -56,8 +76,9 @@
             <label class="block text-sm">CEP </label>
             <input
                 v-model="form.postal_code"
+                v-imask="{ mask: '00000-000' }"
                 type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -70,7 +91,7 @@
             <input
                 v-model="form.address"
                 type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -83,7 +104,7 @@
             <input
                 v-model="form.province"
                 type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -96,7 +117,7 @@
             <input
                 v-model="form.address_number"
                 type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -109,7 +130,7 @@
             <input
                 v-model="form.complement"
                 type="text"
-                class="mt-1 w-full border rounded px-2 py-1"
+                class="shadow appearance-none border rounded w-full px-2 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
         </div>
         <div class="mb-4" v-else>
@@ -122,7 +143,7 @@
             <button
                 v-if="disabled"
                 @click="disabled = !disabled"
-                class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+                class="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
             >
                 {{ 'Editar'  }}
             </button>
@@ -143,6 +164,8 @@
 <script>
 import axios from 'axios'
 import bus from '@/eventBus';
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 
 export default {
     data: function () {
@@ -167,7 +190,9 @@ export default {
         async submit() {
             await axios.put(`api/asass/client/${this.form.id}`, this.form).then(({ data: { data } }) => {
                 this.form = data
+                localStorage.setItem('myAppClient', JSON.stringify(this.form));
                 this.disabled = true
+                toast.success('Cliente atualizado com sucesso!');
                 bus.emit('set-client', this.form);
             }).catch(error => {
                 console.error('Error creating client:', error)
@@ -180,6 +205,23 @@ export default {
     },
     created() {
         bus.on('set-client', (client) => {
+            if(!client) {
+                this.disabled = true;
+                this.form = {
+                    id: null,
+                    asaas_id: '',
+                    cpf_cnpj: '',
+                    name: '',
+                    email: '',
+                    phone: '',
+                    postal_code: '',
+                    address: '',
+                    address_number: '',
+                    complement: '',
+                    province: ''
+                };
+                return;
+            }
             this.setClient(client);
         });
     },

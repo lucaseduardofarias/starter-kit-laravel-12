@@ -164,6 +164,27 @@ final class AsaasClient
 
     /**
      * @throws AsaasClientException
+     * @throws JsonException
+     */
+    public function payment(string $asass_id): PaymentOutputData
+    {
+        try {
+            $response = $this->clientGuzzle->get(sprintf(self::ENDPOINT_PAYMENTS_WITH_ID, $asass_id));
+        } catch (GuzzleException $exception) {
+            $this->handleRequestException($exception);
+        } catch (Exception $exception) {
+            throw new AsaasClientException(
+                message: 'Problema não identificado no cadastro do pagamento.',
+                code: FoundationResponse::HTTP_BAD_REQUEST,
+                previous: $exception
+            );
+        }
+
+        return $this->toDataObject($response, PaymentOutputData::class);
+    }
+
+    /**
+     * @throws AsaasClientException
      */
     private function handleRequestException(GuzzleException $exception): void
     {

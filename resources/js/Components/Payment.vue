@@ -21,9 +21,8 @@
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Produto</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Valor</th>
                     <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Tipo</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Parcelas</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Realizado em</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Atualizado em</th>
+                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Realizado</th>
+                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Atualizado</th>
                     <th class="px-4 py-2"></th>
                 </tr>
                 </thead>
@@ -35,18 +34,22 @@
                     <td class="px-4 py-2">{{ payment.description }}</td>
                     <td class="px-4 py-2">{{ formatValue(payment.value) }}</td>
                     <td class="px-4 py-2 text-center">{{ formatType(payment.billing_type) }}</td>
-                    <td class="px-4 py-2 text-center">
-                        {{ formatInstallment(payment.value, payment.billing_type, payment.installment) }}
-                    </td>
                     <td class="px-4 py-2 text-center">{{ formatDate(payment.created_at) }}</td>
                     <td class="px-4 py-2 text-center">{{ formatDate(payment.updated_at) }}</td>
                     <td class="px-4 py-2 text-right">
                         <button
                             @click="showPayment(payment.id, payment.billing_type)"
                             type="button"
-                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded"
+                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded pb-px"
                         >
                             Visualizar
+                        </button>
+                        <button
+                            @click="updateStatusPayment(payment.id)"
+                            type="button"
+                            class="bg-green-500 hover:bg-green-600 focus:ring-2 focus:ring-green-300 text-white text-sm px-3 py-1 rounded"
+                        >
+                            Atualizar
                         </button>
                     </td>
                 </tr>
@@ -310,7 +313,7 @@
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
             <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto overflow-auto max-h-[90vh]">
-                <div class="bg-green-600 px-4 py-3 rounded-t-lg">
+                <div class="bg-black px-4 py-3 rounded-t-lg">
                     <h5 class="text-lg font-semibold text-white">PIX - FINALIZE O PAGAMENTO</h5>
                 </div>
                 <div class="px-6 py-4 text-center space-y-4">
@@ -334,7 +337,7 @@
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
             <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl overflow-auto max-h-[90vh]">
-                <div class="bg-green-600 px-4 py-3 rounded-t-lg">
+                <div class="bg-black px-4 py-3 rounded-t-lg">
                     <h5 class="text-lg font-semibold text-white">BOLETO - FINALIZE O PAGAMENTO</h5>
                 </div>
                 <div class="text-center p-0">
@@ -354,7 +357,7 @@
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
         <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl overflow-auto max-h-[90vh]">
-            <div class="bg-green-600 px-4 py-3 rounded-t-lg">
+            <div class="bg-black px-4 py-3 rounded-t-lg">
                 <h5 class="text-lg font-semibold text-white">CARTÃO DE CRÉDITO - PARCELAS</h5>
             </div>
             <div class="px-6 py-4 overflow-x-auto">
@@ -392,7 +395,8 @@
 import axios from 'axios';
 import bus from '@/eventBus';
 import debounce from 'lodash/debounce';
-
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 export default {
     name: 'PaymentsComponent',
     setup() {
@@ -522,6 +526,7 @@ export default {
             const payload = this.buildPayload();
             try {
                 const { data } = await axios.post(`/api/asass/client/${this.client.id}/payments`, payload);
+                toast.success('Pagamento registrado com sucesso!');
                 this.showModalPayment = false;
                 await this.showPayment(data.data.id, data.data.billing_type);
                 await this.fetchPayments();
@@ -546,7 +551,19 @@ export default {
                     this.showModalCreditCard = true;
                 }
             } catch (error) {
-                alert(error.response.data.data);
+                this.handleApiError(error);
+            }
+        },
+        async updateStatusPayment(id) {
+            try {
+                const { data } = await axios.get(`/api/asass/client/${this.client.id}/payment/${id}/status`);
+
+                const payment = this.payments.find(p => p.id === id);
+                if (payment) {
+                    payment.status = data.data.status;
+                }
+            } catch (error) {
+                this.handleApiError(error);
             }
         },
         setClient(client) {
@@ -610,22 +627,21 @@ export default {
         },
         fetchValues() {
             this.values = [
-                {value: '', name: 'Selecione'},
-                {value: '1200.00', name: 'R$ 1.200,00 - INTAKE N55'},
-                {value: '1500.00', name: 'R$ 1.500,00 - INTAKE N55 + MAPEAMENTO'},
-                {value: '7000.00', name: 'R$ 7.000,00 - INTAKE N55 + MAPEAMENTO + TURBO'}
+                { value: '', name: 'Selecione' },
+                { value: '1200.00', name: 'R$ 1.200,00 - INTAKE N55' },
+                { value: '1500.00', name: 'R$ 1.500,00 - INTAKE N55 + MAPEAMENTO' }
             ];
         },
         fetchTypes() {
             this.types = [
-                {value: '', name: 'Selecione'},
-                {value: this.PAYMENT_TYPES.PIX, name: 'PIX'},
-                {value: this.PAYMENT_TYPES.BOLETO, name: 'BOLETO'},
-                {value: this.PAYMENT_TYPES.CREDIT_CARD, name: 'CARTÃO'}
+                { value: '', name: 'Selecione'},
+                { value: this.PAYMENT_TYPES.PIX, name: 'PIX' },
+                { value: this.PAYMENT_TYPES.BOLETO, name: 'BOLETO' },
+                { value: this.PAYMENT_TYPES.CREDIT_CARD, name: 'CARTÃO'}
             ];
         },
         async fetchCards() {
-            const {data} = await axios.get(`/api/asass/client/${this.client.id}/cards`);
+            const { data } = await axios.get(`/api/asass/client/${this.client.id}/cards`);
             this.cards = data.data;
         },
         fetchInstallments() {
@@ -644,7 +660,7 @@ export default {
             return f ? f.name : '';
         },
         formatStatus(s) {
-            const m = {PENDING: 'PENDENTE', CONFIRMED: 'CONFIRMADO'};
+            const m = {PENDING: 'PENDENTE', RECEIVED: 'CONFIRMADO'};
             return m[s] || s;
         },
         formatType(t) {
@@ -663,7 +679,38 @@ export default {
         },
         copyText() {
             navigator.clipboard.writeText(this.modal.pix.payload);
-        }
+            toast.success('Código PIX copiado para a área de transferência!');
+        },
+        handleApiError(error) {
+            const resp = error.response;
+            if (resp && resp.data) {
+                const { errors, message } = resp.data;
+                let msg = message[0] || '';
+
+                if (errors && typeof errors === 'object') {
+                    const details = Object.values(errors)
+                        .flat()
+                        .filter(Boolean)
+                        .join('\n');
+                    if (details) {
+                        msg += '\n\n' + details;
+                    }
+                }
+
+                toast.error(msg || 'Erro ao processar a solicitação.');
+            } else {
+                toast.error('Erro desconhecido. Verifique sua conexão e tente novamente.');
+            }
+        },
     }
 };
 </script>
+
+<style scoped>
+.bg-status-PENDING{
+    background: #ff9a00;
+}
+.bg-status-RECEIVED{
+    background: #22c55e;
+}
+</style>

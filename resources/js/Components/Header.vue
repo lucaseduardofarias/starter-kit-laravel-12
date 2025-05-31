@@ -14,9 +14,19 @@
                 <div class="flex items-center justify-end space-x-4 flex-nowrap">
                     <input
                         v-model="cpf_cnpj"
+                        v-imask="{
+                          mask: [
+                            { mask: '000.000.000-00' },
+                            { mask: '00.000.000/0000-00' }
+                          ],
+                          dispatch: function (appended, dynamicMasked) {
+                            const onlyNumbers = (dynamicMasked.value + appended).replace(/\D+/g, '');
+                            return onlyNumbers.length > 11 ? dynamicMasked.compiledMasks[1]: dynamicMasked.compiledMasks[0];
+                          }
+                        }"
                         :disabled="loading || cpf_cnpj && client ? true : false"
                         type="text"
-                        class="shadow  border rounded px-2 py-1 w-60"
+                        class="shadow border rounded px-2 py-1 w-60"
                         placeholder="Informe o seu CPF ou CNPJ"
                     />
 
@@ -40,7 +50,7 @@
 
                     <!-- Botão de encerrar -->
                     <button
-                        @click="cpf_cnpj = ''"
+                        @click="resetClient"
                         v-if="!loading && cpf_cnpj && client"
                         type="button"
                         class="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
@@ -53,8 +63,6 @@
     </nav>
 </template>
 
-
-
 <script>
 import bus from '../eventBus';
 import _ from 'lodash';
@@ -62,55 +70,86 @@ import _ from 'lodash';
 export default {
     name: 'HeaderVue',
     props: ['title'],
+
     data() {
         return {
             loading: false,
             cpf_cnpj: '',
-            client: null
-        }
+            client: null,
+        };
     },
+
     watch: {
-        cpf_cnpj: _.debounce(function() {
+        cpf_cnpj: _.debounce(function () {
             this.cpf_cnpj = this.cpf_cnpj.trim();
-            if(!this.cpf_cnpj) {
+            if (!this.cpf_cnpj) {
                 this.fetchClient();
             }
-        })
+        }, 300),
     },
+
+    mounted() {
+        const savedClient = localStorage.getItem('myAppClient');
+        if (savedClient) {
+            try {
+                this.client = JSON.parse(savedClient);
+                this.cpf_cnpj = this.client.cpf_cnpj;
+                this.emitSetClient();
+            } catch (e) {
+                console.error('Falha ao analisar client do localStorage', e);
+                localStorage.removeItem('myAppClient');
+            }
+        }
+    },
+
     methods: {
-        emitSetClient(){
+        resetClient() {
+            this.cpf_cnpj = '';
+            this.client = null;
+            localStorage.removeItem('myAppClient');
+            this.emitSetClient();
+        },
+
+        emitSetClient() {
             bus.emit('set-client', this.client);
         },
+
         fetchClient() {
-            if(!this.cpf_cnpj){
+            if (!this.cpf_cnpj) {
                 this.client = null;
                 this.emitSetClient();
-            }
-            else {
+            } else {
                 this.loading = true;
-                axios.get("/api/asass/client/search/" + this.cpf_cnpj)
-                    .then(response => {
+
+                axios
+                    .get('/api/asass/client/search/' + this.cpf_cnpj)
+                    .then((response) => {
                         this.client = response.data.data;
                         this.cpf_cnpj = this.client.cpf_cnpj;
+                        localStorage.setItem('myAppClient', JSON.stringify(this.client));
                         this.emitSetClient();
                     })
                     .catch(() => {
-                        axios.post("/api/asass/client", { cpf_cnpj: this.cpf_cnpj}).then(response => {
+                        axios
+                            .post('/api/asass/client', { cpf_cnpj: this.cpf_cnpj })
+                            .then((response) => {
                                 this.client = response.data.data;
                                 this.cpf_cnpj = this.client.cpf_cnpj;
+                                localStorage.setItem('myAppClient', JSON.stringify(this.client));
                                 this.emitSetClient();
-                        }).catch(error => {
-                            this.handleApiError(error)
-                            this.client = null;
-                            this.emitSetClient();
-                        });
+                            })
+                            .catch((error) => {
+                                this.handleApiError(error);
+                                this.client = null;
+                                this.emitSetClient();
+                            });
                     })
                     .finally(() => {
                         this.loading = false;
                     });
-
             }
         },
+
         handleApiError(error) {
             const resp = error.response;
             if (resp && resp.data) {
@@ -126,18 +165,17 @@ export default {
                         msg += '\n\n' + details;
                     }
                 }
-
                 alert(msg);
             } else {
                 alert('Erro desconhecido. Verifique sua conexão e tente novamente.');
             }
         },
-    }
+    },
 };
 </script>
 
 <style scoped>
-.title{
+.title {
     padding-top: 0.4rem;
 }
 </style>

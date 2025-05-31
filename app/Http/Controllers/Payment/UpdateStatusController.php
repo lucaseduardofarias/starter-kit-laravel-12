@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
-final class ShowController extends Controller
+final class UpdateStatusController extends Controller
 {
     public function __construct(
         private readonly Response $response,
@@ -19,7 +19,7 @@ final class ShowController extends Controller
     public function __invoke(int $clientId, string $paymentId): JsonResponse
     {
         try {
-            $payment = $this->service->paymentByBillingType($clientId, $paymentId);
+            $payment = $this->service->updateStatusPayment($clientId, $paymentId);
         } catch (Exception $exception) {
             return $this->response->withError($exception->getMessage(), 400);
         }

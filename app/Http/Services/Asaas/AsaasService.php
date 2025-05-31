@@ -17,17 +17,17 @@ final class AsaasService
     ) {
     }
 
+    /**
+     * @throws AsaasClientException
+     * @throws JsonException
+     */
     public function createOrUpdateCustomer(?string $id, CustomerInputData $customerInputData): CustomerOutputData
     {
-        try {
-            if ($id) {
-                return $this->asaasClient->updateCustomer($id, $customerInputData);
-            }
-
-            return $this->asaasClient->createCustomer($customerInputData);
-        } catch (AsaasClientException|JsonException $exception) {
-            throw new \RuntimeException($exception->getMessage(), $exception->getCode());
+        if ($id) {
+            return $this->asaasClient->updateCustomer($id, $customerInputData);
         }
+
+        return $this->asaasClient->createCustomer($customerInputData);
     }
 
     public function createPayment(PaymentInputData $data): PaymentOutputData
@@ -44,6 +44,15 @@ final class AsaasService
     {
         try {
             return $this->asaasClient->pixQrCode($asass_id);
+        } catch (AsaasClientException|JsonException $exception) {
+            throw new \RuntimeException($exception->getMessage(), $exception->getCode());
+        }
+    }
+
+    public function payment(string $asass_id): PaymentOutputData
+    {
+        try {
+            return $this->asaasClient->payment($asass_id);
         } catch (AsaasClientException|JsonException $exception) {
             throw new \RuntimeException($exception->getMessage(), $exception->getCode());
         }

@@ -5,18 +5,16 @@
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                <HeaderVue title="Pagamentos"/>
+                <HeaderVue title="Sistema de pagamentos exemplo"/>
             </h2>
         </template>
 
         <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="flex gap-6">
-                <!-- Coluna 1/3: formulário -->
                 <div class="w-1/3 bg-white shadow p-4 rounded">
                     <ClientForm/>
                 </div>
 
-                <!-- Coluna 2/3: tabela, que vai buscar JSON -->
                 <div class="flex-1 bg-white shadow p-4 rounded">
                     <Payment/>
                 </div>

@@ -5,9 +5,11 @@ namespace App\Http\Services\Payment;
 use App\Http\Services\Asaas\AsaasService;
 use App\Http\Services\Asaas\Data\Customer\CustomerInputData;
 use App\Http\Services\Asaas\Data\Payment\Input\PaymentInputData;
+use App\Http\Services\Asaas\Exception\AsaasClientException;
 use App\Http\Services\Payment\Enum\PaymentTypeEnum;
 use App\Models\Client;
 use App\Models\Payment;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 final readonly class PaymentService
@@ -17,6 +19,11 @@ final readonly class PaymentService
     ) {
     }
 
+    /**
+     * @throws AsaasClientException
+     * @throws \JsonException
+     * @throws Exception
+     */
     public function create(int $clientId, PaymentInputData $data): Payment
     {
         /** @var Client $client */
@@ -27,7 +34,7 @@ final readonly class PaymentService
         $this->setCustomer($client);
 
         if (!$client->asaas_id) {
-            throw new \RuntimeException('Failed to retrieve or create customer for client ID: ' . $clientId);
+            throw new Exception('Não foi possivel criar o cliente na integração de pagamento, tente mais tarde');
         }
 
         $data->customer = $client->asaas_id;
@@ -78,6 +85,28 @@ final readonly class PaymentService
         return $data;
     }
 
+
+    public function updateStatusPayment(string $clientId, string $paymentId): Payment
+    {
+        $payment = Payment::query()
+            ->where('client_id', '=', $clientId)
+            ->whereKey($paymentId)
+            ->firstOrFail();
+
+
+        $newStatus = $this->service->payment($payment->asaas_id);
+
+        $payment->update([
+            'status' => $newStatus->status,
+        ]);
+
+        return $payment;
+    }
+
+    /**
+     * @throws AsaasClientException
+     * @throws \JsonException
+     */
     public function setCustomer(Client $client): void
     {
         if ($client->asaas_id) {
